@@ -1,0 +1,52 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.4.1'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.mysite'
+version = '0.0.1-SNAPSHOT'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	developmentOnly 'org.springframework.boot:spring-boot-devtools' 
+	// developmentOnly : 개발환경에만 적용, 운영 환경에 배포되는 jar, war 파일에는 이 라이브러리가 포함되지 않음
+	// spring-boot-devtools : 서버 재시작을 하지 않아도, 소스코드를 변경 후 저장을 하면, 자동으로 서버를 재시작해주는 라이브러리 
+	compileOnly 'org.projectlombok:lombok' 
+    annotationProcessor 'org.projectlombok:lombok' 
+    // lombok 라이브러리 적용 (lombok.jar 설치 후 의존성 코드 추가해줘야 함)
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+    // MariaDB
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' 
+    // JPA 환경 설정
+    testImplementation 'org.junit.jupiter:junit-jupiter' 
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    // JUnit : 테스트 코드를 작성하고, 작성한 테스트 코드를 실행할 때 사용하는 자바의 테스트 프레임워크(리포지터리만 개별 실행해 테스트하기 위함)
+    // 원래는 질문을 등록하는 화면과 사용자가 입력한 질문 관련 정보를 저장하는 컨트롤러, 서비스 파일 등이 필요
+    implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+    // thymeleaf 템플릿 엔진을 사용하기 위한 종속성
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    // Spring Boot Validation : 사용자로부터 입력받은 값을 검증하기 위해 필요
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    // Spring Security : 스프링 기반 웹 애플리케이션의 인증과 권한을 담당하는 스프링의 하위 프레임워크(로그인, 회원가입 구현을 위해 추가)
+    implementation 'org.commonmark:commonmark:0.21.0'
+    // 마크다운 라이브러리 설치 
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
