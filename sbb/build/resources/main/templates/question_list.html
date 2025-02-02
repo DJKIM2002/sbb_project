@@ -1,0 +1,106 @@
+<html xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	  layout:decorate="~{layout}">
+	<!--<link rel="stylesheet" type="text/css" th:href="@{/bootstrap.min.css}">-->
+	
+	<div layout:fragment="content" class="container my-3">
+		<div class="row my-3">
+	        <div class="col-6">
+	            <a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>
+				<a th:href="@{/category/list}" class="btn btn-outline-secondary ms-2">카테고리 추가</a>
+	        </div>
+	        <div class="col-6">
+	            <div class="input-group">
+	                <input type="text" id="search_kw" class="form-control" th:value="${kw}">
+	                <button class="btn btn-outline-secondary" type="button" id="btn_search">찾기</button>
+	            </div>
+	        </div>
+	    </div>
+		<table class="table">
+		    <thead class="table-dark">
+		        <tr class="text-center">
+					<th>번호</th>
+					<th>카테고리</th>
+					<th style="width:50%">제목</th>
+					    <th>글쓴이</th>
+		            <th>작성일시</th>
+		        </tr>
+		    </thead>
+		    <tbody>
+				<tr class="text-center" th:each="question, loop : ${paging}">
+				    <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}"></td>
+					<!--paging.getTotalElements : 전체 게시물의 개수
+					paging.number : 현재 페이지 번호
+					paging.size : 페이지 당 게시물 개수
+					loop.index : 나열 인덱스(0부터 시작)-->
+
+					<td>
+						<span th:text="${question.category.name}"></span>
+					</td>
+
+		            <td class="text-start">
+						<a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>	
+						<!--문자열과 자바 객체의 값을 더할 때에는 '|'으로 좌우를 감싸줘야 함.-->
+						<span class="text-danger small ms-2"
+							th:if="${#lists.size(question.answerList) > 0}"
+							th:text="${#lists.size(question.answerList)}">
+						</span>
+						<!--어떤 게시물에 달린 답변이 0개보다 많으면, 답변 개수를 표시  -->
+					</td>
+					<td><span th:if="${question.author != null}" th:text="${question.author.username}"></span></td>
+		            <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd HH:mm')}"></td>
+		        </tr>
+		    </tbody>
+		</table>
+		<!-- 페이징처리 시작 -->
+		    <div th:if="${!paging.isEmpty()}">
+		        <ul class="pagination justify-content-center">
+		            <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
+						<!--이전 페이지가 없으면 이전 버튼 비활성화-->
+		                <a class="page-link"
+		                    href="javascript:void(0)" th:data-page="${paging.number-1}">
+							<!--이전 페이지로 이동-->
+		                    <span>이전</span>
+		                </a>
+		            </li>
+		            <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
+						th:if="${page >= paging.number-5 and page <= paging.number+5}"
+		                th:classappend="${page == paging.number} ? 'active'" 
+		                class="page-item">
+						<!--0부터 전체 페이지 수 만큼 이 요소를 반복 생성, 현재 순번을 page 변수에 대입-->
+						<!--반복 구간 내에서 해당 페이지가 현재 페이지와 같은 경우 활성화-->
+						<!--현재 페이지를 기준으로 +-5인 범위만 페이징 번호 버튼 표시-->
+		                <a th:text="${page + 1}" class="page-link" href="javascript:void(0)" th:data-page="${page}"></a>
+		            </li>
+		            <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
+						<!--이전 페이지가 없으면 다음 버튼 비활성화-->
+		                <a class="page-link" href="javascript:void(0)" th:data-page="${paging.number+1}">
+							<!--다음 페이지로 이동-->
+		                    <span>다음</span>
+		                </a>
+		            </li>
+		        </ul>
+		    </div>
+		<!-- 페이징처리 끝 -->
+		<!--<a th:href="@{/question/create}" class="btn btn-primary">질문 등록하기</a>-->
+		<form th:action="@{/question/list}" method="get" id="searchForm">
+	        <input type="hidden" id="kw" name="kw" th:value="${kw}">
+	        <input type="hidden" id="page" name="page" th:value="${paging.number}">
+	    </form>
+	</div>
+	<script layout:fragment="script" type='text/javascript'>
+		const page_elements = document.getElementsByClassName("page-link");
+		Array.from(page_elements).forEach(function(element) {
+		    element.addEventListener('click', function() {
+		        document.getElementById('page').value = this.dataset.page;
+		        document.getElementById('searchForm').submit();
+		    });
+		});
+		const btn_search = document.getElementById("btn_search");
+		btn_search.addEventListener('click', function() {
+		    document.getElementById('kw').value = document.getElementById('search_kw').value;
+		    document.getElementById('page').value = 0;  // 검색버튼을 클릭할 경우 0페이지부터 조회한다.
+		    document.getElementById('searchForm').submit();
+		});
+	</script>
+</html>
+

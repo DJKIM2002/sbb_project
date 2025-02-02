@@ -5,22 +5,16 @@ import java.util.List;
 import java.util.Set;
 
 import com.mysite.sbb.answer.Answer;
+import com.mysite.sbb.category.Category;
 import com.mysite.sbb.user.SiteUser;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
-@Setter
+@NoArgsConstructor
 @Entity
 public class Question {
 	@Id
@@ -45,4 +39,27 @@ public class Question {
 	
 	@ManyToMany
     Set<SiteUser> voter;
+
+	@ManyToOne
+	@JoinColumn(name = "category_id", nullable = false)
+	private Category category; // 질문이 속한 카테고리
+
+	public Question(String subject, String content, LocalDateTime createDate, Category category, SiteUser author) {
+		this.subject = subject;
+		this.content = content;
+		this.createDate = createDate;
+		this.category = category;
+		this.author = author;
+	}
+
+	public void update(String subject, String content, LocalDateTime modifyDate, Category category) {
+		this.subject = subject;
+		this.content = content;
+		this.modifyDate = modifyDate;
+		this.category = category;
+	}
+
+	public void addVoter(SiteUser siteUser) {
+		this.voter.add(siteUser);
+	}
 }

@@ -2,6 +2,7 @@ package com.mysite.sbb.question;
 
 import java.util.List;
 
+import com.mysite.sbb.category.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -34,4 +35,8 @@ public interface QuestionRepository extends JpaRepository<Question, Integer>{
             + "   or u2.username like %:kw% ")
     Page<Question> findAllByKeyword(@Param("kw") String kw, Pageable pageable);
 	// JPQL을 이용한 검색 기능 구현
+
+	@Query("SELECT q FROM Question q WHERE q.category = :category AND (q.subject LIKE %:kw% OR q.content LIKE %:kw%)")
+	Page<Question> findByCategoryAndKeyword(@Param("category") Category category, @Param("kw") String kw, Pageable pageable);
+
 }

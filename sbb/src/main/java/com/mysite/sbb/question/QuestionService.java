@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.mysite.sbb.category.Category;
+import com.mysite.sbb.category.CategoryService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class QuestionService {
 	private final QuestionRepository questionRepository; // 생성자 방식 주입(@RequiredArgsConstructor)
+    private final CategoryService categoryService;
 
 	public Page<Question> getList(int page, String kw) {
 		List<Sort.Order> sorts = new ArrayList<>();
@@ -38,20 +41,16 @@ public class QuestionService {
             throw new DataNotFoundException("question not found");
         }
     }
-    
-    public void create(String subject, String content, SiteUser user) {
-        Question q = new Question();
-        q.setSubject(subject);
-        q.setContent(content);
-        q.setAuthor(user);
-        q.setCreateDate(LocalDateTime.now());
-        this.questionRepository.save(q);
+
+    public void create(String subject, String content, Long categoryId, SiteUser user) {
+        Category category = categoryService.getCategoryById(categoryId);
+        Question question = new Question(subject, content, LocalDateTime.now(), category, user);
+        this.questionRepository.save(question);
     }
-    
-    public void modify(Question question, String subject, String content) {
-        question.setSubject(subject);
-        question.setContent(content);
-        question.setModifyDate(LocalDateTime.now());
+
+    public void modify(Question question, String subject, String content, Long categoryId) {
+        Category category = categoryService.getCategoryById(categoryId);
+        question.update(subject, content, LocalDateTime.now(), category);
         this.questionRepository.save(question);
     }
     
@@ -60,10 +59,21 @@ public class QuestionService {
     }
     
     public void vote(Question question, SiteUser siteUser) {
-        question.getVoter().add(siteUser);
+        question.addVoter(siteUser);
         this.questionRepository.save(question);
     }
-    
+
+    public Page<Question> getListByCategory(int page, String kw, Long categoryId) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+        Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
+
+        // 카테고리가 존재하는 경우 해당 카테고리의 질문만 필터링
+        Category category = categoryService.getCategoryById(categoryId);
+        return this.questionRepository.findByCategoryAndKeyword(category, kw, pageable);
+    }
+
+
     // 게시글 검색 기능(Specification 이용)
 //    private Specification<Question> search(String kw) {
 //        return new Specification<>() {

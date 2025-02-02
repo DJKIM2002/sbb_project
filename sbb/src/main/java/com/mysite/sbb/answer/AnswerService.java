@@ -1,18 +1,15 @@
 package com.mysite.sbb.answer;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-
 import com.mysite.sbb.DataNotFoundException;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
-
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
@@ -53,9 +50,13 @@ public class AnswerService {
         this.answerRepository.save(answer);
     }
     
-    // 답변 페이지네이션 구현
-    public Page<Answer> getAnswerList(int page) {
-    	Pageable pageable = PageRequest.of(page, 2);
-    	return this.answerRepository.findAll(pageable);
+    // 답변 페이징 처리
+    public Page<Answer> getAnswersByQuestion(Integer questionId, Pageable pageable, String sort) {
+        if ("voterCount".equals(sort)) {
+            return answerRepository.findByQuestionIdOrderByVoterCountDesc(questionId, pageable);
+        }
+        return answerRepository.findByQuestionIdOrderByCreateDateDesc(questionId, pageable);
     }
+
+
 }
